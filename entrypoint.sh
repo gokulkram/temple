@@ -1,16 +1,15 @@
 #!/bin/sh
-# Railway container entrypoint: bind Apache to $PORT, seed images/ if a
-# freshly-mounted (empty) volume has replaced the baked-in photos, then run.
+# Container entrypoint (Render): bind Apache to $PORT, seed images/ if a
+# freshly-mounted (empty) disk has replaced the baked-in photos, then run.
 set -e
 
 PORT="${PORT:-80}"
 sed -ri "s/^Listen .*/Listen ${PORT}/" /etc/apache2/ports.conf
 sed -ri "s/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/" /etc/apache2/sites-enabled/000-default.conf
 
-# A fresh Railway volume is a newly-formatted ext4 filesystem, which ships
-# its own root-owned lost+found/ dir - that alone makes the mount point
-# non-empty, so an "is it empty" check never fires. Use an explicit marker
-# instead of inferring emptiness.
+# A fresh disk mount can ship its own root-owned lost+found/ dir - that
+# alone makes the mount point non-empty, so an "is it empty" check never
+# fires. Use an explicit marker instead of inferring emptiness.
 if [ ! -f /var/www/html/images/.seeded ]; then
     echo "images/ not yet seeded - copying in the image's baked-in photos"
     cp -r /var/www/html-images-seed/. /var/www/html/images/

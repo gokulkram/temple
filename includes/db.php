@@ -1,48 +1,60 @@
 <?php
 /**
- * Single shared PDO connection.
+ * Single shared MongoDB connection.
  *
- * Every query in this project goes through prepared statements. There is no
- * place where a value is concatenated into SQL.
+ * Every collection name used here matches the old MySQL table name 1:1 -
+ * this schema never had foreign keys, so the port was a straight rename,
+ * not a redesign.
  */
 declare(strict_types=1);
 
+require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/config.php';
 
-function db(): PDO
+function db(): \MongoDB\Database
 {
-    static $pdo = null;
-    if ($pdo instanceof PDO) {
-        return $pdo;
+    static $client = null;
+    if ($client === null) {
+        try {
+            $client = new \MongoDB\Client(MONGODB_URI);
+            // Force a round trip now, not on the first real query, so a bad
+            // URI or unreachable cluster fails the same way the old PDO
+            // connect-failure path did.
+            $client->selectDatabase('admin')->command(['ping' => 1]);
+        } catch (\Throwable $e) {
+            error_log('DB connection failed: ' . $e->getMessage());
+            http_response_code(503);
+            exit('The site is temporarily unavailable. Please try again shortly.');
+        }
     }
-
-    $dsn = sprintf(
-        'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
-        DB_HOST, DB_PORT, DB_NAME
-    );
-
-    try {
-        $pdo = new PDO($dsn, DB_USER, DB_PASS, [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            // Real prepared statements, not client-side interpolation.
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ]);
-    } catch (PDOException $e) {
-        // Never leak credentials or SQL to the visitor.
-        error_log('DB connection failed: ' . $e->getMessage());
-        http_response_code(503);
-        exit('The site is temporarily unavailable. Please try again shortly.');
-    }
-
-    return $pdo;
+    return $client->selectDatabase(MONGODB_DB);
 }
 
-/** Fetch every row of a table in display order. */
-function all(string $table, string $order = 'sort_order'): array
+/** Turn a Mongo document into the assoc array shape the rest of the app expects. */
+function _doc(\MongoDB\Model\BSONDocument $doc): array
 {
-    // $table and $order are never user input - they are literals in this codebase.
-    return db()->query("SELECT * FROM `$table` ORDER BY `$order` ASC")->fetchAll();
+    // BSONDocument extends ArrayObject - (array) casting it does not copy
+    // its stored fields, so this must go through getArrayCopy() instead.
+    $row = $doc->getArrayCopy();
+    $row['id'] = (string) $row['_id'];
+    unset($row['_id']);
+    return $row;
+}
+
+/** Fetch every row of a collection in display order. */
+function all(string $collection, string $order = 'sort_order'): array
+{
+    $rows = [];
+    foreach (db()->selectCollection($collection)->find([], ['sort' => [$order => 1]]) as $doc) {
+        $rows[] = _doc($doc);
+    }
+    return $rows;
+}
+
+/** Number of documents in a collection. */
+function row_count(string $collection): int
+{
+    return db()->selectCollection($collection)->countDocuments();
 }
 
 /** All settings as a flat key => value map. */
@@ -51,8 +63,8 @@ function settings(): array
     static $cache = null;
     if ($cache === null) {
         $cache = [];
-        foreach (db()->query('SELECT skey, svalue FROM settings') as $r) {
-            $cache[$r['skey']] = $r['svalue'];
+        foreach (db()->selectCollection('settings')->find() as $r) {
+            $cache[$r['_id']] = $r['svalue'];
         }
     }
     return $cache;
@@ -70,8 +82,8 @@ function sections(): array
     static $cache = null;
     if ($cache === null) {
         $cache = [];
-        foreach (db()->query('SELECT skey, title_ta, title_en FROM sections') as $r) {
-            $cache[$r['skey']] = $r;
+        foreach (db()->selectCollection('sections')->find() as $r) {
+            $cache[$r['_id']] = ['title_ta' => $r['title_ta'], 'title_en' => $r['title_en']];
         }
     }
     return $cache;

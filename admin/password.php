@@ -13,9 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $new     = (string) ($_POST['new'] ?? '');
     $again   = (string) ($_POST['again'] ?? '');
 
-    $st = db()->prepare('SELECT password_hash FROM users WHERE id = ?');
-    $st->execute([$_SESSION['user_id']]);
-    $hash = (string) $st->fetchColumn();
+    $userId = new \MongoDB\BSON\ObjectId($_SESSION['user_id']);
+    $user   = db()->selectCollection('users')->findOne(['_id' => $userId]);
+    $hash   = $user ? (string) $user['password_hash'] : '';
 
     if (!password_verify($current, $hash)) {
         $errors[] = 'தற்போதைய கடவுச்சொல் தவறு. (Current password is incorrect.)';
@@ -28,8 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$errors) {
-        db()->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
-            ->execute([password_hash($new, PASSWORD_DEFAULT), $_SESSION['user_id']]);
+        db()->selectCollection('users')->updateOne(
+            ['_id' => $userId],
+            ['$set' => ['password_hash' => password_hash($new, PASSWORD_DEFAULT)]]
+        );
         // A password change should invalidate any other stolen session.
         session_regenerate_id(true);
         flash('கடவுச்சொல் மாற்றப்பட்டது. (Password changed.)');

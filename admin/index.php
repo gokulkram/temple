@@ -4,11 +4,6 @@ declare(strict_types=1);
 require_once __DIR__ . '/_layout.php';
 require_login();
 
-function row_count(string $table): int
-{
-    return (int) db()->query("SELECT COUNT(*) FROM `$table`")->fetchColumn();
-}
-
 $cols = collections();
 admin_head('கட்டுப்பாட்டு பலகை / Dashboard');
 ?>

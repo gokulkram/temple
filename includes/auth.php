@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/db.php';
 
+use MongoDB\BSON\UTCDateTime;
+
 /** Start a hardened session. Safe to call more than once. */
 function session_start_secure(): void
 {
@@ -70,12 +72,13 @@ function attempt_login(string $username, string $password): ?string
 {
     session_start_secure();
 
-    $st = db()->prepare('SELECT * FROM users WHERE username = ? LIMIT 1');
-    $st->execute([$username]);
-    $user = $st->fetch();
+    $user = db()->selectCollection('users')->findOne(['username' => $username]);
 
-    if ($user && $user['locked_until'] !== null && strtotime($user['locked_until']) > time()) {
-        $mins = (int) ceil((strtotime($user['locked_until']) - time()) / 60);
+    $lockedUntil = $user && $user['locked_until'] !== null
+        ? $user['locked_until']->toDateTime()->getTimestamp()
+        : null;
+    if ($lockedUntil !== null && $lockedUntil > time()) {
+        $mins = (int) ceil(($lockedUntil - time()) / 60);
         return "கணக்கு தற்காலிகமாக பூட்டப்பட்டுள்ளது. $mins நிமிடங்களில் மீண்டும் முயற்சிக்கவும். "
              . "(Account locked. Try again in $mins minute" . ($mins === 1 ? '' : 's') . ".)";
     }
@@ -93,34 +96,42 @@ function attempt_login(string $username, string $password): ?string
         return 'தவறான பயனர்பெயர் அல்லது கடவுச்சொல். (Incorrect username or password.)';
     }
 
+    $users = db()->selectCollection('users');
+
     // Re-hash if PHP's default cost or algorithm has moved on since signup.
     if (password_needs_rehash($user['password_hash'], PASSWORD_DEFAULT)) {
-        $st = db()->prepare('UPDATE users SET password_hash = ? WHERE id = ?');
-        $st->execute([password_hash($password, PASSWORD_DEFAULT), $user['id']]);
+        $users->updateOne(
+            ['_id' => $user['_id']],
+            ['$set' => ['password_hash' => password_hash($password, PASSWORD_DEFAULT)]]
+        );
     }
 
-    db()->prepare('UPDATE users SET failed_attempts = 0, locked_until = NULL,
-                   last_login = NOW() WHERE id = ?')->execute([$user['id']]);
+    $users->updateOne(
+        ['_id' => $user['_id']],
+        ['$set' => ['failed_attempts' => 0, 'locked_until' => null, 'last_login' => new UTCDateTime()]]
+    );
 
     // New session ID on privilege change, to defeat session fixation.
     session_regenerate_id(true);
-    $_SESSION['user_id']   = (int) $user['id'];
+    $_SESSION['user_id']   = (string) $user['_id'];
     $_SESSION['username']  = $user['username'];
     $_SESSION['last_seen'] = time();
 
     return null;
 }
 
-function record_failure(array $user): void
+function record_failure(object $user): void
 {
+    $users = db()->selectCollection('users');
     $n = (int) $user['failed_attempts'] + 1;
     if ($n >= LOGIN_MAX_TRIES) {
-        db()->prepare('UPDATE users SET failed_attempts = 0,
-                       locked_until = DATE_ADD(NOW(), INTERVAL ? MINUTE) WHERE id = ?')
-            ->execute([LOGIN_LOCK_MINS, $user['id']]);
+        $lockUntil = new UTCDateTime((time() + LOGIN_LOCK_MINS * 60) * 1000);
+        $users->updateOne(
+            ['_id' => $user['_id']],
+            ['$set' => ['failed_attempts' => 0, 'locked_until' => $lockUntil]]
+        );
     } else {
-        db()->prepare('UPDATE users SET failed_attempts = ? WHERE id = ?')
-            ->execute([$n, $user['id']]);
+        $users->updateOne(['_id' => $user['_id']], ['$set' => ['failed_attempts' => $n]]);
     }
 }
 

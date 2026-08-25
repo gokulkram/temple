@@ -9,15 +9,12 @@
 declare(strict_types=1);
 
 // ---- database ----
-// On Railway these come from the MySQL plugin's reference variables
-// (MYSQLHOST, MYSQLPORT, ...), wired up as env vars on this service - see
-// README's Railway section. Locally, with no env vars set, this falls back
-// to XAMPP's MySQL on port 3307.
-define("DB_HOST", getenv("MYSQLHOST") ?: "127.0.0.1");
-define("DB_PORT", getenv("MYSQLPORT") ?: "3307");
-define("DB_NAME", getenv("MYSQLDATABASE") ?: "aa");
-define("DB_USER", getenv("MYSQLUSER") ?: "root");
-define("DB_PASS", getenv("MYSQLPASSWORD") ?: "changeme-set-your-local-mysql-password");
+// MongoDB Atlas. MONGODB_URI is set as an environment variable on this
+// service - see README's Render section. Locally, export it yourself
+// (there is no local fallback database - point it at a scratch Atlas
+// database instead of production, e.g. one named "temple_dev").
+define("MONGODB_URI", getenv("MONGODB_URI") ?: "");
+define("MONGODB_DB",  getenv("MONGODB_DB") ?: "temple");
 
 // ---- paths ----
 define("IMAGE_DIR",  __DIR__ . "/../images");
@@ -30,7 +27,10 @@ define("MAX_IMAGE_EDGE",   1600);              // px, longest side
 define("THUMB_EDGE",       400);
 
 // ---- sessions / login ----
-define("SESSION_NAME",     "temple_admin");
+// Renamed from "temple_admin" on the MongoDB cutover: $_SESSION['user_id']
+// changed shape from an int to an ObjectId hex string, so any cookie still
+// alive from the MySQL era must be abandoned rather than reused.
+define("SESSION_NAME",     "temple_admin_v2");
 define("SESSION_IDLE_MAX", 30 * 60);           // seconds before auto-logout
 define("LOGIN_MAX_TRIES",  5);
 define("LOGIN_LOCK_MINS",  15);

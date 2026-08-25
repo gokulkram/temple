@@ -1,7 +1,8 @@
 # அருள்மிகு ஆனைமலை கருப்பராயர் திருக்கோவில் — website + admin
 
-PHP 8 / MariaDB site with a bilingual (Tamil + English) admin panel.
-No framework, no build step: copy the folder to the host and it runs.
+PHP 8 / MongoDB site with a bilingual (Tamil + English) admin panel.
+No framework, no build step: copy the folder to the host and it runs
+(`composer install` is needed once, for the MongoDB driver library).
 
 ## Layout
 
@@ -12,7 +13,10 @@ images/              photos + thumbs/  ·  .htaccess blocks execution here
 includes/            config, db, auth, sanitize, upload, collections
   .htaccess          denies all direct HTTP access to this folder
 admin/               login, dashboard, editors, gallery, password
-sql/                 schema.sql + seed.sql (real content, safe to re-run)
+sql/                 old MariaDB schema.sql + seed.sql - kept for reference,
+                     not used since the move to MongoDB
+scripts/             migrate-to-mongo.php - one-off MySQL->Mongo migration,
+                     not part of the deployed app
 _original/           the hand-written HTML this was built from
 _eleventy/           earlier Git-CMS attempt, unused - safe to delete
 ```
@@ -30,8 +34,9 @@ Admin  http://localhost/aa/admin/
 To remove the link later: `rmdir "E:\xmapp\htdocs\aa"` (removes the junction
 only, never the real folder).
 
-**Local MySQL is on port 3307, not 3306** — that is this XAMPP's config, and
-it is set in `includes/config.php`.
+There is no local MongoDB — set `MONGODB_URI` (and optionally `MONGODB_DB`,
+default `temple`) as an environment variable before running locally, pointed
+at a scratch Atlas database (e.g. `temple_dev`), not production.
 
 ## Admin
 
@@ -55,7 +60,10 @@ writing a new page.
   `SameSite=Strict` cookies, 30-minute idle timeout, 15-minute lockout after
   5 failed attempts.
 - **CSRF token on every write.** Verified: no token and wrong token both 400.
-- **PDO prepared statements everywhere**, emulation off.
+- **Parameterized queries everywhere** — the MongoDB driver's query documents
+  are never built by string-concatenating user input, and multi-document
+  writes in `admin/edit.php` run inside a client-session transaction for the
+  same all-or-nothing guarantee the old PDO transactions gave.
 - **HTML allowlist** (`includes/sanitize.php`). Page content legitimately
   contains `<br>`, `<a href="tel:">`, `<em>`, `<span class="time">`, so output
   cannot simply be escaped. Anything else — `<script>`, `onerror`,
@@ -81,10 +89,15 @@ edit. Reverting to delete-by-absence brings the data loss straight back.
 
 ## Deploying to a real host
 
-1. Copy everything except `_eleventy/`, `_site/` and `_original/`.
-2. Create the database, import `sql/schema.sql` then `sql/seed.sql`.
-3. Edit `includes/config.php` — host, **port (usually 3306 there)**, name, user,
-   password.
+1. Copy everything except `_eleventy/`, `_site/`, `_original/` and `scripts/`.
+2. Run `composer install --no-dev` (needs the `mongodb` PHP extension
+   installed on the host).
+3. Create a MongoDB database (Atlas or self-hosted) and set `MONGODB_URI`
+   (and `MONGODB_DB` if not using the default `temple`) as environment
+   variables. There's no schema to import — collections are created on
+   first write — but you do need to seed initial content; see
+   `scripts/migrate-to-mongo.php` if migrating from an existing MySQL copy,
+   or create the admin `users` document by hand otherwise.
 4. Confirm `.htaccess` is honoured: `https://yoursite/includes/config.php`
    must return **403**. If it returns the file, the host has `AllowOverride
    None` — move `includes/` above the web root instead.
@@ -93,30 +106,48 @@ edit. Reverting to delete-by-absence brings the data loss straight back.
    previews show no image.
 6. Change the admin password. Force HTTPS.
 
-## Deploying to Railway
+## Deploying to Render
 
 The repo is set up to build straight from `Dockerfile` — no manual server
-config needed.
+config needed. The database itself is **MongoDB Atlas**, not anything
+Render provides — Render only hosts the app (a Docker web service:
+Apache/PHP + a persistent disk for `images/`). `render.yaml` describes the
+service as a Blueprint; using it is optional but saves re-entering these
+settings by hand.
 
-1. Create a Railway project, add a **MySQL** database plugin, and add this
-   repo as a second service (`railway.json` points it at the `Dockerfile`
-   build).
-2. On the app service's **Variables** tab, add references to the MySQL
-   plugin's `MYSQLHOST`, `MYSQLPORT`, `MYSQLDATABASE`, `MYSQLUSER`,
-   `MYSQLPASSWORD`. `includes/config.php` reads these directly — once they're
-   set there's nothing to edit in code.
-3. Import the schema: connect to the MySQL plugin's public connection string
-   (Railway shows it on the plugin's **Connect** tab) with any MySQL client
-   and run `sql/schema.sql` then `sql/seed.sql`.
-4. Deploy. The `Dockerfile` already sets `AllowOverride All` so `.htaccess`
+1. In the Render dashboard, create a new **Blueprint** (or plain **Web
+   Service**) from this repo — Render detects `render.yaml`
+   automatically if present, or pick **Docker** as the runtime and point it
+   at `Dockerfile` otherwise. Use the **Starter** plan or above — the free
+   tier has no persistent disk, so uploaded gallery photos would be wiped on
+   every redeploy.
+2. Attach a persistent disk mounted at `/var/www/html/images` (already
+   declared in `render.yaml`, 1 GB is plenty for this site's photo count).
+3. Create a MongoDB Atlas cluster (a free/shared tier works — it's still a
+   replica set, so the transactions `admin/edit.php` relies on are
+   supported), a database user, and a database named `temple`.
+4. On the service's **Environment** tab, set `MONGODB_URI` to the Atlas
+   connection string (Atlas → **Connect** → **Drivers** → copy the full
+   `mongodb+srv://user:pass@cluster.../` URI) and `MONGODB_DB` to `temple`
+   if it isn't already the default. `includes/config.php` reads these
+   directly — nothing else to edit in code.
+5. The `Dockerfile` builds the `mongodb` PHP extension and runs
+   `composer install` automatically — no manual driver setup needed.
+6. Seed initial content into Atlas — either run
+   `scripts/migrate-to-mongo.php` from a machine that can reach both the old
+   MySQL source and Atlas, or create the `settings`/`sections`/`users`
+   documents by hand for a fresh site (see `sql/seed.sql` for the shape and
+   values, minus the `users` row, which has no seed and must be created
+   directly).
+7. Deploy. The `Dockerfile` already sets `AllowOverride All` so `.htaccess`
    in `includes/` and `images/` is honoured out of the box, and
-   `entrypoint.sh` rebinds Apache to Railway's dynamic `$PORT` at container
+   `entrypoint.sh` rebinds Apache to Render's dynamic `$PORT` at container
    start — no extra config needed for either.
-5. If you mount a volume at `images/` (so uploads survive redeploys), leave
-   it empty on first attach — `entrypoint.sh` detects the empty volume and
-   seeds it from the image's baked-in photos automatically.
-6. In admin → Site Settings, replace both `REPLACE-WITH-DOMAIN` values with
-   the Railway-assigned (or custom) domain. Change the admin password.
+8. The disk mounted at `images/` starts empty on first attach —
+   `entrypoint.sh` detects that and seeds it from the image's baked-in
+   photos automatically.
+9. In admin → Site Settings, replace both `REPLACE-WITH-DOMAIN` values with
+   the Render-assigned (or custom) domain. Change the admin password.
 
 ## Backups
 

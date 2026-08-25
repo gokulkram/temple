@@ -19,7 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'uploa
     $errs  = [];
 
     if ($files && is_array($files['name'])) {
-        $next = (int) db()->query('SELECT COALESCE(MAX(sort_order), 0) FROM gallery_photos')->fetchColumn();
+        $gallery = db()->selectCollection('gallery_photos');
+        $top     = $gallery->find([], ['sort' => ['sort_order' => -1], 'limit' => 1])->toArray();
+        $next    = $top ? (int) $top[0]['sort_order'] : 0;
 
         for ($i = 0; $i < count($files['name']); $i++) {
             if ((int) $files['error'][$i] === UPLOAD_ERR_NO_FILE) {
@@ -38,9 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'uploa
                 continue;
             }
             $next += 10;
-            db()->prepare('INSERT INTO gallery_photos (filename, label, caption, sort_order)
-                           VALUES (?, ?, ?, ?)')
-                ->execute([$res['filename'], 'புதிய படம்', 'புதிய படம் / New photo', $next]);
+            $gallery->insertOne([
+                'filename'    => $res['filename'],
+                'label'       => 'புதிய படம்',
+                'caption'     => 'புதிய படம் / New photo',
+                'sort_order'  => $next,
+                'uploaded_at' => new \MongoDB\BSON\UTCDateTime(),
+            ]);
             $added++;
         }
     }
@@ -67,21 +73,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
         redirect('gallery.php');
     }
 
-    $pdo = db();
-    $pdo->beginTransaction();
+    $gallery = db()->selectCollection('gallery_photos');
     try {
         $submitted = $_POST['rows'];
-        $kept  = [];
         $order = 0;
 
         foreach ($submitted as $r) {
             if (!is_array($r)) { continue; }
-            $id = (int) (is_scalar($r['id'] ?? null) ? $r['id'] : 0);
-            if ($id <= 0) { continue; }
+            $rawId = is_scalar($r['id'] ?? null) ? trim((string) $r['id']) : '';
+            if (!preg_match('/^[a-f0-9]{24}$/i', $rawId)) { continue; }
             $order += 10;
-            $pdo->prepare('UPDATE gallery_photos SET label = ?, caption = ?, sort_order = ? WHERE id = ?')
-                ->execute([post_str($r, 'label'), post_str($r, 'caption'), $order, $id]);
-            $kept[] = $id;
+            $gallery->updateOne(
+                ['_id' => new \MongoDB\BSON\ObjectId($rawId)],
+                ['$set' => ['label' => post_str($r, 'label'), 'caption' => post_str($r, 'caption'), 'sort_order' => $order]]
+            );
         }
 
         // Deletion is explicit: the browser names the photos it removed.
@@ -89,35 +94,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
         // the whole gallery and unlink every file.
         $toDelete = [];
         foreach ((array) ($_POST['deleted'] ?? []) as $d) {
-            if (is_scalar($d) && ctype_digit((string) $d) && (int) $d > 0) {
-                $toDelete[] = (int) $d;
+            if (is_scalar($d) && preg_match('/^[a-f0-9]{24}$/i', trim((string) $d))) {
+                $toDelete[] = new \MongoDB\BSON\ObjectId(trim((string) $d));
             }
         }
 
         $orphans = [];
         if ($toDelete) {
-            $ph = implode(',', array_fill(0, count($toDelete), '?'));
-            $st = $pdo->prepare("SELECT filename FROM gallery_photos WHERE id IN ($ph)");
-            $st->execute($toDelete);
-            $orphans = $st->fetchAll(PDO::FETCH_COLUMN);
-            $pdo->prepare("DELETE FROM gallery_photos WHERE id IN ($ph)")->execute($toDelete);
+            foreach ($gallery->find(['_id' => ['$in' => $toDelete]], ['projection' => ['filename' => 1]]) as $doc) {
+                $orphans[] = $doc['filename'];
+            }
+            $gallery->deleteMany(['_id' => ['$in' => $toDelete]]);
         }
-        $pdo->commit();
 
         // Only unlink a file once no row anywhere still points at it.
         foreach ($orphans as $f) {
-            $st = db()->prepare('SELECT COUNT(*) FROM gallery_photos WHERE filename = ?');
-            $st->execute([$f]);
-            $inUse = (int) $st->fetchColumn() > 0
+            $inUse = $gallery->countDocuments(['filename' => $f]) > 0
                 || $f === setting('hero_image');
             if (!$inUse) { delete_image($f); }
         }
 
         flash('சேமிக்கப்பட்டது. (Gallery saved.)');
     } catch (Throwable $e) {
-        $pdo->rollBack();
         error_log('Gallery save failed: ' . $e->getMessage());
-        flash('சேமிக்க முடியவில்லை. (Could not save — nothing was changed.)', 'err');
+        // Each row is its own write now (no cross-collection transaction, unlike
+        // admin/edit.php), so a mid-loop failure can leave earlier rows saved -
+        // never claim nothing changed here.
+        flash('சேமிக்க முடியவில்லை. (Save failed partway through — reload to check what was saved.)', 'err');
     }
     redirect('gallery.php');
 }
@@ -172,7 +175,7 @@ admin_head('கோயில் படங்கள் / Gallery');
                             <span class="ttl"></span>
                             <button type="button" class="btn danger small js-del">நீக்கு</button>
                         </div>
-                        <input type="hidden" name="rows[<?= $i ?>][id]" value="<?= (int) $p['id'] ?>">
+                        <input type="hidden" name="rows[<?= $i ?>][id]" value="<?= esc($p['id']) ?>">
                         <?php
                         field(['label' => 'குறுந்தலைப்பு / Short label', 'type' => 'text', 'required' => true],
                               "rows[$i][label]", $p['label']);
@@ -207,12 +210,12 @@ admin_head('கோயில் படங்கள் / Gallery');
         // Name the photo being deleted. The server removes only what is listed
         // here, so a malformed submission can never wipe the gallery.
         const idInput = card.querySelector('input[name$="[id]"]');
-        const id = idInput ? parseInt(idInput.value, 10) : 0;
-        if (id > 0) {
+        const id = idInput ? idInput.value : '';
+        if (id !== '') {
             const marker = document.createElement('input');
             marker.type = 'hidden';
             marker.name = 'deleted[]';
-            marker.value = String(id);
+            marker.value = id;
             form.appendChild(marker);
         }
         card.remove();

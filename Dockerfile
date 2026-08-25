@@ -1,6 +1,6 @@
-# PHP 8 + Apache, built for Railway.
+# PHP 8 + Apache, built for Render.
 #
-# Railway assigns a dynamic $PORT and terminates TLS in front of the
+# Render assigns a dynamic $PORT and terminates TLS in front of the
 # container, so Apache is rewired to listen on $PORT at startup
 # (see entrypoint.sh) rather than the usual 80/443.
 FROM php:8.2-apache
@@ -11,9 +11,13 @@ FROM php:8.2-apache
 # ("cannot open shared object file") even though the build itself succeeds.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libpng-dev libjpeg62-turbo-dev libwebp-dev libfreetype6-dev \
+        libssl-dev pkg-config git unzip \
     && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype \
-    && docker-php-ext-install -j"$(nproc)" gd pdo_mysql exif \
+    && docker-php-ext-install -j"$(nproc)" gd exif \
+    && pecl install mongodb && docker-php-ext-enable mongodb \
     && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # .htaccess in includes/ and images/ is load-bearing for this app's security
 # model (see README) - it only works if overrides are actually allowed.
@@ -31,13 +35,17 @@ RUN sed -ri -e 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.c
 WORKDIR /var/www/html
 COPY . /var/www/html/
 
-# Not part of the running app - see README ("safe to delete") and the loose
-# dump/archive at the repo root. Keeping them out of the image is just size.
-RUN rm -rf _eleventy _original aa.zip aa.sql sample.pdf
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# A Railway volume mounted at images/ starts EMPTY, which would hide the
+# Not part of the running app - see README ("safe to delete") and the loose
+# dump/archive at the repo root. scripts/ is the MySQL->Mongo migration
+# tool, meant to be run manually from a developer machine, not shipped in
+# the image. Keeping them out of the image is just size.
+RUN rm -rf _eleventy _original aa.zip aa.sql sample.pdf scripts sql
+
+# A Render disk mounted at images/ starts EMPTY, which would hide the
 # photos baked into this image. Keep a pristine copy so the entrypoint can
-# seed the (possibly empty) volume on first boot.
+# seed the (possibly empty) disk on first boot.
 RUN cp -r images /var/www/html-images-seed
 
 RUN chown -R www-data:www-data /var/www/html

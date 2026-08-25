@@ -24,10 +24,13 @@ if (!$col) {
 // ---------------------------------------------------------------- save
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
-    $pdo = db();
-    $pdo->beginTransaction();
+    $mongo   = db();
+    $session = null;
 
     try {
+        $session = $mongo->getManager()->startSession();
+        $session->startTransaction();
+
         // Section heading, if this collection has one. Only touch it when both
         // fields actually arrived and are non-empty - a heading is never
         // legitimately blank, and a partial POST must not erase it.
@@ -36,8 +39,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ta = post_str($_POST, 'section_title_ta');
             $en = post_str($_POST, 'section_title_en');
             if ($ta !== '' && $en !== '') {
-                $pdo->prepare('UPDATE sections SET title_ta = ?, title_en = ? WHERE skey = ?')
-                    ->execute([$ta, $en, $col['section']]);
+                $mongo->selectCollection('sections')->updateOne(
+                    ['_id' => $col['section']],
+                    ['$set' => ['title_ta' => $ta, 'title_en' => $en]],
+                    ['session' => $session]
+                );
             }
         }
 
@@ -58,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $names   = array_column($def['fields'], 'name');
             $types   = array_column($def['fields'], 'type', 'name');
             $order   = 0;
+            $coll    = $mongo->selectCollection($table);
 
             foreach ($submitted as $row) {
                 if (!is_array($row)) {
@@ -65,18 +72,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 // The id decides which row gets overwritten, so validate it
-                // rather than casting. (int) on an array yields 1, and (int)
-                // on "1 OR 1=1" yields 1 - either would silently overwrite
-                // whichever row happens to have id 1.
-                $rawId = $row['id'] ?? '0';
+                // rather than casting: an empty string means "new row", and
+                // anything else must be a well-formed 24-char ObjectId hex
+                // string - never trusted as-is.
+                $rawId = $row['id'] ?? '';
                 if (!is_scalar($rawId)) {
                     continue;                       // malformed row, skip it
                 }
                 $rawId = trim((string) $rawId);
-                if ($rawId !== '' && !ctype_digit($rawId)) {
+                if ($rawId !== '' && !preg_match('/^[a-f0-9]{24}$/i', $rawId)) {
                     continue;
                 }
-                $id = (int) $rawId;
 
                 $values  = [];
                 $badType = false;
@@ -105,16 +111,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $order += 10;
+                $values['sort_order'] = $order;
 
-                if ($id > 0) {
-                    $set = implode(', ', array_map(fn($n) => "`$n` = ?", $names));
-                    $st  = $pdo->prepare("UPDATE `$table` SET $set, `sort_order` = ? WHERE `id` = ?");
-                    $st->execute([...array_values($values), $order, $id]);
+                if ($rawId !== '') {
+                    $coll->updateOne(
+                        ['_id' => new \MongoDB\BSON\ObjectId($rawId)],
+                        ['$set' => $values],
+                        ['session' => $session]
+                    );
                 } else {
-                    $cols = implode(', ', array_map(fn($n) => "`$n`", $names));
-                    $ph   = implode(', ', array_fill(0, count($names), '?'));
-                    $st   = $pdo->prepare("INSERT INTO `$table` ($cols, `sort_order`) VALUES ($ph, ?)");
-                    $st->execute([...array_values($values), $order]);
+                    $coll->insertOne($values, ['session' => $session]);
                 }
             }
 
@@ -127,22 +133,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // submission can do is fail to save an edit.
             $toDelete = [];
             foreach ((array) ($_POST['deleted'][$table] ?? []) as $d) {
-                if (is_scalar($d) && ctype_digit((string) $d) && (int) $d > 0) {
-                    $toDelete[] = (int) $d;
+                if (is_scalar($d) && preg_match('/^[a-f0-9]{24}$/i', trim((string) $d))) {
+                    $toDelete[] = new \MongoDB\BSON\ObjectId(trim((string) $d));
                 }
             }
             if ($toDelete) {
-                $ph = implode(',', array_fill(0, count($toDelete), '?'));
-                $pdo->prepare("DELETE FROM `$table` WHERE `id` IN ($ph)")->execute($toDelete);
+                $coll->deleteMany(['_id' => ['$in' => $toDelete]], ['session' => $session]);
             }
         }
 
-        $pdo->commit();
+        $session->commitTransaction();
         flash('சேமிக்கப்பட்டது. (Saved.)');
     } catch (Throwable $e) {
-        $pdo->rollBack();
+        if ($session && $session->isInTransaction()) {
+            try {
+                $session->abortTransaction();
+            } catch (Throwable $ignored) {
+                // The original $e above is what gets logged/flashed either way.
+            }
+        }
         error_log('Save failed: ' . $e->getMessage());
         flash('சேமிக்க முடியவில்லை. (Could not save — nothing was changed.)', 'err');
+    } finally {
+        $session?->endSession();
     }
 
     redirect('edit.php?c=' . urlencode($key));
@@ -190,7 +203,7 @@ admin_head($col['label']);
                             <span class="ttl"><?= esc(mb_strimwidth(strip_tags((string) $r[$def['summary']]), 0, 70, '…')) ?></span>
                             <button type="button" class="btn danger small js-del">நீக்கு / Delete</button>
                         </div>
-                        <input type="hidden" name="rows[<?= esc($table) ?>][<?= $i ?>][id]" value="<?= (int) $r['id'] ?>">
+                        <input type="hidden" name="rows[<?= esc($table) ?>][<?= $i ?>][id]" value="<?= esc($r['id']) ?>">
                         <?php foreach ($def['fields'] as $f) {
                             field($f, "rows[$table][$i][{$f['name']}]", $r[$f['name']] ?? '');
                         } ?>
@@ -210,7 +223,7 @@ admin_head($col['label']);
                         <span class="ttl">புதிய உருப்படி / New item</span>
                         <button type="button" class="btn danger small js-del">நீக்கு / Delete</button>
                     </div>
-                    <input type="hidden" name="rows[<?= esc($table) ?>][__i__][id]" value="0">
+                    <input type="hidden" name="rows[<?= esc($table) ?>][__i__][id]" value="">
                     <?php foreach ($def['fields'] as $f) {
                         field($f, "rows[$table][__i__][{$f['name']}]", '');
                     } ?>
@@ -245,13 +258,13 @@ admin_head($col['label']);
             // Name the row we are deleting. The server deletes only what is
             // listed here - it never infers deletion from a missing row.
             const idInput = panel.querySelector('input[name$="[id]"]');
-            const id = idInput ? parseInt(idInput.value, 10) : 0;
+            const id = idInput ? idInput.value : '';
             const table = panel.closest('.list').dataset.table;
-            if (id > 0) {
+            if (id !== '') {
                 const marker = document.createElement('input');
                 marker.type = 'hidden';
                 marker.name = 'deleted[' + table + '][]';
-                marker.value = String(id);
+                marker.value = id;
                 form.appendChild(marker);
             }
 

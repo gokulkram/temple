@@ -8,10 +8,8 @@ $groups = setting_groups();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
-    $pdo = db();
-    $pdo->beginTransaction();
+    $settingsCol = db()->selectCollection('settings');
     try {
-        $st = $pdo->prepare('UPDATE settings SET svalue = ? WHERE skey = ?');
         foreach ($groups as $keys) {
             foreach ($keys as $k) {
                 $posted = is_array($_POST['s'] ?? null) ? ($_POST['s'][$k] ?? null) : null;
@@ -22,16 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     continue;
                 }
                 $raw = trim($posted);
-                $st->execute([
-                    setting_type($k) === 'rich' ? clean_html($raw) : $raw,
-                    $k,
-                ]);
+                $settingsCol->updateOne(
+                    ['_id' => $k],
+                    ['$set' => ['svalue' => setting_type($k) === 'rich' ? clean_html($raw) : $raw]]
+                );
             }
         }
-        $pdo->commit();
         flash('சேமிக்கப்பட்டது. (Settings saved.)');
     } catch (Throwable $e) {
-        $pdo->rollBack();
         error_log('Settings save failed: ' . $e->getMessage());
         flash('சேமிக்க முடியவில்லை. (Could not save.)', 'err');
     }
@@ -40,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Fetch current values plus the per-field hint stored alongside them.
 $rows = [];
-foreach (db()->query('SELECT skey, svalue, notes FROM settings') as $r) {
-    $rows[$r['skey']] = $r;
+foreach (db()->selectCollection('settings')->find() as $r) {
+    $rows[$r['_id']] = ['skey' => $r['_id'], 'svalue' => $r['svalue'], 'notes' => $r['notes'] ?? ''];
 }
 
 admin_head('தள அமைப்புகள் / Site Settings');

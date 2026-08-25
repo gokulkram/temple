@@ -1,6 +1,7 @@
 node_modules/
 _site/
 .cache/
+/vendor/
 
 # Loose local dump/archive at the repo root - not part of the documented
 # project layout (see README), and aa.sql carries an old credential hash.

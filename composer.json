@@ -1,0 +1,13 @@
+{
+    "name": "stallioni/temple",
+    "description": "Temple website + admin panel (PHP 8, MongoDB)",
+    "type": "project",
+    "require": {
+        "php": ">=8.2",
+        "ext-mongodb": "*",
+        "mongodb/mongodb": "^2.4"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
