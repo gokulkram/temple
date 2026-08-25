@@ -1,0 +1,34 @@
+title_ta: கோயில் பற்றி
+title_en: About the Temple
+paragraphs:
+- ta: அன்னூர் ஆனைமலை கருப்பராயசுவாமி கோயில் தமிழ்நாட்டில் கோயம்புத்தூர் மாவட்டம், அன்னூர் என்னும் ஊரில்
+    அமைந்துள்ள ஒரு கிராமக் கோயிலாகும்.
+  en: The Annur Anaimalai Karupparayaswami Temple is a revered village temple situated in Annur, Coimbatore
+    District, Tamil Nadu. This sacred shrine is dedicated to Lord Karupparayan, a powerful guardian deity
+    deeply venerated across the Tamil countryside.
+- ta: இக்கோயில் முதன்மைத் திருக்கோயில் என்ற வகைப்பாட்டில் இந்து அறநிலையத்துறையின் கட்டுப்பாட்டில் உள்ளது.
+    பரம்பரை அல்லாத அறங்காவலர் அமைப்பால் நிர்வகிக்கப்படுகிறது.
+  en: Classified as a "Thirukkoyil" (sacred temple), it is administered under the Hindu Religious and
+    Charitable Endowments Department and managed by non-hereditary trustees (Arangavalars).
+info_rows:
+- label: கோயில் பெயர்
+  value_ta: அருள்மிகு ஆனைமலை கருப்பராயர் திருக்கோவில்
+  value_en: Arulmiku Anaimalai Karupparayar Thirukkoyil
+- label: அமைவிடம் / Location
+  value_ta: அன்னூர், அன்னூர் வட்டம்
+  value_en: Annur, Annur Taluk, Coimbatore
+- label: மூலவர் / Main Deity
+  value_ta: கருப்பராயன்
+  value_en: Lord Karupparayan
+- label: சட்டமன்றத் தொகுதி
+  value_ta: அவிநாசி
+  value_en: Avinashi Assembly Constituency
+- label: மக்களவைத் தொகுதி
+  value_ta: நீலகிரி
+  value_en: Nilgiris Parliamentary Constituency
+- label: அஞ்சல் குறியீடு / Pincode
+  value_ta: '641653'
+  value_en: ''
+- label: நிர்வாகம் / Administration
+  value_ta: இந்து அறநிலையத்துறை — பரம்பரை அல்லாத அறங்காவலர்
+  value_en: HR&CE Dept — Non-hereditary Trustees

@@ -1,0 +1,38 @@
+# Uploaded files live here. Nothing in this folder may ever execute.
+#
+# Three independent layers, because which one applies depends on how PHP is
+# wired up on the host (mod_php, CGI, FastCGI or LiteSpeed):
+#
+#   1. FilesMatch deny  - works everywhere, blocks the request outright
+#   2. RemoveHandler    - unbinds any interpreter still mapped to these types
+#   3. php_flag off     - mod_php only, and guarded so a FastCGI host does
+#                         not return a 500 for an unknown directive
+
+<FilesMatch "\.(?i:php[0-9]?|phtml|phps|pht|phar|cgi|pl|py|sh|asp|aspx|jsp|htaccess)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_mime.c>
+    RemoveHandler .php .php3 .php4 .php5 .php7 .php8 .phtml .phps .pht .phar
+    RemoveType    .php .php3 .php4 .php5 .php7 .php8 .phtml .phps .pht .phar
+    AddType text/plain .php .phtml .phps
+</IfModule>
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# Directory listings would expose every uploaded filename.
+Options -Indexes -ExecCGI

@@ -1,0 +1,14 @@
+# Nothing in this folder is ever requested directly - index.php and the admin
+# pages include these files from disk. config.php holds the database password,
+# so a misconfigured or disabled PHP handler must not be able to serve it as
+# plain text.
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
+
+Options -Indexes

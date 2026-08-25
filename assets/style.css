@@ -1,0 +1,1546 @@
+        /* ============================================
+           CSS CUSTOM PROPERTIES
+           ============================================ */
+        :root {
+            --temple-crimson: #8B1A1A;
+            --temple-deep-red: #6B0F0F;
+            --temple-maroon: #4A0808;
+            --gold-bright: #D4A017;
+            --gold-light: #F0D060;
+            --gold-deep: #B8860B;
+            --gold-pale: #F5E6B8;
+            --saffron: #E8752A;
+            --saffron-light: #F4A460;
+            --sacred-cream: #FDF8F0;
+            --sacred-ivory: #FAF3E8;
+            --wood-dark: #3E2723;
+            --wood-medium: #5D4037;
+            --wood-light: #8D6E63;
+            --temple-black: #1A0A0A;
+            --vermilion: #E23D28;
+            --turmeric: #E8B830;
+            --lotus-pink: #D4627A;
+            --kolam-white: rgba(255, 255, 255, 0.9);
+
+            --font-tamil: 'Noto Sans Tamil', sans-serif;
+            --font-display: 'Cinzel', serif;
+            --font-body: 'Cormorant Garamond', serif;
+
+            --section-padding: clamp(3rem, 8vw, 7rem);
+        }
+
+        /* ============================================
+           RESET & BASE
+           ============================================ */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--sacred-cream);
+            color: var(--temple-black);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ============================================
+           KOLAM PATTERN SVG (reusable)
+           ============================================ */
+        .kolam-divider {
+            width: 100%;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        .kolam-divider::before {
+            content: '';
+            position: absolute;
+            width: 80%;
+            max-width: 600px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-deep), transparent);
+        }
+
+        .kolam-divider svg {
+            position: relative;
+            z-index: 1;
+            background: var(--sacred-cream);
+            padding: 0 1rem;
+        }
+
+        /* ============================================
+           ORNAMENTAL BORDER PATTERN
+           ============================================ */
+        .temple-border-top {
+            height: 12px;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    var(--gold-bright) 0px,
+                    var(--gold-bright) 8px,
+                    var(--temple-crimson) 8px,
+                    var(--temple-crimson) 16px,
+                    var(--gold-bright) 16px,
+                    var(--gold-bright) 24px,
+                    var(--temple-deep-red) 24px,
+                    var(--temple-deep-red) 32px
+                );
+            position: relative;
+        }
+
+        .temple-border-top::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold-deep), var(--gold-bright), var(--gold-deep));
+        }
+
+        /* ============================================
+           NAVIGATION
+           ============================================ */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+            transition: all 0.4s ease;
+        }
+
+        .nav.scrolled {
+            background: linear-gradient(180deg, rgba(75, 8, 8, 0.97), rgba(107, 15, 15, 0.95));
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .nav-om {
+            width: 38px;
+            height: 38px;
+            border: 2px solid var(--gold-bright);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--gold-bright);
+            font-family: var(--font-tamil);
+            font-weight: 700;
+        }
+
+        .nav-title {
+            font-family: var(--font-tamil);
+            color: var(--gold-light);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            line-height: 1.3;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 0.25rem;
+        }
+
+        .nav-links a {
+            color: var(--gold-pale);
+            text-decoration: none;
+            font-family: var(--font-tamil);
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            width: 0;
+            height: 1.5px;
+            background: var(--gold-bright);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-links a:hover::after {
+            width: 60%;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold-bright);
+        }
+
+        .nav-mobile-toggle {
+            display: none;
+            background: none;
+            border: 1px solid var(--gold-deep);
+            color: var(--gold-light);
+            font-size: 1.4rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: var(--temple-maroon);
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(139, 26, 26, 0.6) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(139, 26, 26, 0.4) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 0%, rgba(212, 160, 23, 0.15) 0%, transparent 50%),
+                linear-gradient(180deg, var(--temple-maroon) 0%, var(--temple-black) 100%);
+        }
+
+        /* Gopuram silhouette using CSS */
+        .hero-gopuram {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 450px;
+            opacity: 0.06;
+        }
+
+        .hero-gopuram::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 120px;
+            background: var(--gold-bright);
+            clip-path: polygon(10% 100%, 90% 100%, 85% 0%, 15% 0%);
+        }
+
+        .hero-gopuram::after {
+            content: '';
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 330px;
+            background: var(--gold-bright);
+            clip-path: polygon(0% 100%, 100% 100%, 75% 0%, 25% 0%);
+        }
+
+        /* Floating lamp particles */
+        .hero-particles {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--gold-bright);
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatUp 8s infinite;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(100vh) scale(0); }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.3; }
+            100% { opacity: 0; transform: translateY(-20vh) scale(1); }
+        }
+
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 7s; }
+        .particle:nth-child(2) { left: 20%; animation-delay: 1.2s; animation-duration: 9s; }
+        .particle:nth-child(3) { left: 35%; animation-delay: 0.6s; animation-duration: 8s; }
+        .particle:nth-child(4) { left: 50%; animation-delay: 2s; animation-duration: 6s; }
+        .particle:nth-child(5) { left: 65%; animation-delay: 0.8s; animation-duration: 10s; }
+        .particle:nth-child(6) { left: 75%; animation-delay: 1.5s; animation-duration: 7s; }
+        .particle:nth-child(7) { left: 88%; animation-delay: 3s; animation-duration: 8s; }
+        .particle:nth-child(8) { left: 42%; animation-delay: 4s; animation-duration: 9s; }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 2rem;
+            padding-top: 5rem;
+            animation: heroFadeIn 1.5s ease-out;
+        }
+
+        @keyframes heroFadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-god-image {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--gold-bright);
+            box-shadow:
+                0 0 30px rgba(212, 160, 23, 0.4),
+                0 0 60px rgba(212, 160, 23, 0.15),
+                inset 0 0 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1.5rem;
+            animation: godImageGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes godImageGlow {
+            0%, 100% {
+                box-shadow:
+                    0 0 30px rgba(212, 160, 23, 0.3),
+                    0 0 60px rgba(212, 160, 23, 0.1);
+            }
+            50% {
+                box-shadow:
+                    0 0 40px rgba(212, 160, 23, 0.5),
+                    0 0 80px rgba(212, 160, 23, 0.25),
+                    0 0 120px rgba(212, 160, 23, 0.1);
+            }
+        }
+
+        .hero-om {
+            font-size: 2.5rem;
+            color: var(--gold-bright);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 40px rgba(212, 160, 23, 0.5);
+            animation: omPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes omPulse {
+            0%, 100% { text-shadow: 0 0 40px rgba(212, 160, 23, 0.3); }
+            50% { text-shadow: 0 0 60px rgba(212, 160, 23, 0.6), 0 0 100px rgba(212, 160, 23, 0.2); }
+        }
+
+        .hero-lamp-row {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .lamp-icon {
+            font-size: 1.5rem;
+            color: var(--gold-deep);
+            opacity: 0.7;
+            animation: lampFlicker 3s ease-in-out infinite alternate;
+        }
+
+        .lamp-icon:nth-child(2) { animation-delay: 0.5s; }
+        .lamp-icon:nth-child(3) { animation-delay: 1s; }
+
+        @keyframes lampFlicker {
+            0%, 100% { opacity: 0.5; filter: brightness(0.8); }
+            50% { opacity: 1; filter: brightness(1.2); }
+        }
+
+        .hero-title-tamil {
+            font-family: var(--font-tamil);
+            font-size: clamp(1.8rem, 5vw, 3.2rem);
+            font-weight: 800;
+            color: var(--gold-light);
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-title-english {
+            font-family: var(--font-display);
+            font-size: clamp(0.85rem, 1.8vw, 1.15rem);
+            color: var(--gold-pale);
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            opacity: 0.85;
+        }
+
+        .hero-decorative-line {
+            width: 120px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+            margin: 0 auto 1.5rem;
+        }
+
+        .hero-subtitle {
+            font-family: var(--font-tamil);
+            font-size: clamp(0.85rem, 1.5vw, 1rem);
+            color: var(--saffron-light);
+            opacity: 0.9;
+            margin-bottom: 0.3rem;
+        }
+
+        .hero-location {
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            color: var(--gold-pale);
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .hero-scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            animation: scrollBounce 2s ease-in-out infinite;
+        }
+
+        .hero-scroll-indicator span {
+            font-family: var(--font-tamil);
+            font-size: 0.7rem;
+            color: var(--gold-deep);
+            opacity: 0.6;
+        }
+
+        .scroll-arrow {
+            width: 20px;
+            height: 20px;
+            border-right: 2px solid var(--gold-deep);
+            border-bottom: 2px solid var(--gold-deep);
+            transform: rotate(45deg);
+            opacity: 0.5;
+        }
+
+        @keyframes scrollBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(8px); }
+        }
+
+        /* ============================================
+           SECTION COMMONS
+           ============================================ */
+        .section {
+            padding: var(--section-padding) 2rem;
+            position: relative;
+        }
+
+        .section-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title-tamil {
+            font-family: var(--font-tamil);
+            font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+            font-weight: 700;
+            color: var(--temple-crimson);
+            margin-bottom: 0.3rem;
+        }
+
+        .section-title-english {
+            font-family: var(--font-display);
+            font-size: clamp(0.75rem, 1.2vw, 0.9rem);
+            color: var(--wood-medium);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .section-ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .section-ornament .line {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-deep));
+        }
+
+        .section-ornament .line:last-child {
+            background: linear-gradient(90deg, var(--gold-deep), transparent);
+        }
+
+        .section-ornament .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--gold-bright);
+            transform: rotate(45deg);
+        }
+
+        /* ============================================
+           ABOUT SECTION
+           ============================================ */
+        .about {
+            background: var(--sacred-cream);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .about-text p {
+            font-family: var(--font-tamil);
+            font-size: 1rem;
+            line-height: 2;
+            color: var(--wood-dark);
+            margin-bottom: 1.2rem;
+        }
+
+        .about-text .english-text {
+            font-family: var(--font-body);
+            font-size: 1.05rem;
+            color: var(--wood-medium);
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        .about-info-card {
+            background: linear-gradient(135deg, var(--temple-maroon), var(--temple-deep-red));
+            border-radius: 8px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(212, 160, 23, 0.15) 0%, transparent 70%);
+        }
+
+        .about-info-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold-bright), var(--saffron), var(--gold-bright));
+        }
+
+        .info-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.15);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-family: var(--font-tamil);
+            font-size: 0.75rem;
+            color: var(--gold-deep);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-value {
+            font-family: var(--font-tamil);
+            font-size: 1rem;
+            color: var(--gold-light);
+            font-weight: 600;
+        }
+
+        .info-value-en {
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--gold-pale);
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        /* ============================================
+           HISTORY SECTION
+           ============================================ */
+        .history {
+            background:
+                linear-gradient(180deg, var(--sacred-ivory) 0%, var(--sacred-cream) 100%);
+            position: relative;
+        }
+
+        .history::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(212, 160, 23, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(139, 26, 26, 0.03) 0%, transparent 50%);
+        }
+
+        .history-content {
+            position: relative;
+            display: grid;
+            grid-template-columns: 3px 1fr;
+            gap: 2rem;
+        }
+
+        .history-timeline-line {
+            background: linear-gradient(180deg, var(--gold-bright), var(--temple-crimson), var(--gold-bright));
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .history-entries {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .history-entry {
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .history-entry::before {
+            content: '';
+            position: absolute;
+            left: -1.55rem;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--gold-bright);
+            border: 3px solid var(--temple-crimson);
+            border-radius: 50%;
+        }
+
+        .history-entry-title {
+            font-family: var(--font-tamil);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--temple-crimson);
+            margin-bottom: 0.3rem;
+        }
+
+        .history-entry-title-en {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            color: var(--wood-medium);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+
+        .history-entry p {
+            font-family: var(--font-tamil);
+            font-size: 0.95rem;
+            line-height: 1.9;
+            color: var(--wood-dark);
+        }
+
+        .history-entry .en {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--wood-medium);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        /* ============================================
+           DEITIES SECTION
+           ============================================ */
+        .deities {
+            background: linear-gradient(180deg, var(--temple-maroon), var(--temple-black));
+            color: var(--gold-pale);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .deities::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                repeating-conic-gradient(
+                    from 0deg at 50% 50%,
+                    rgba(212, 160, 23, 0.02) 0deg 30deg,
+                    transparent 30deg 60deg
+                );
+        }
+
+        .deities .section-title-tamil {
+            color: var(--gold-light);
+        }
+
+        .deities .section-title-english {
+            color: var(--gold-pale);
+            opacity: 0.7;
+        }
+
+        .deities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            position: relative;
+        }
+
+        .deity-card {
+            background: linear-gradient(145deg, rgba(139, 26, 26, 0.4), rgba(74, 8, 8, 0.6));
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            border-radius: 8px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .deity-card:hover {
+            border-color: rgba(212, 160, 23, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .deity-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+        }
+
+        .deity-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 1.2rem;
+            border: 2px solid var(--gold-deep);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            background: radial-gradient(circle, rgba(212, 160, 23, 0.1), transparent);
+        }
+
+        .deity-name-tamil {
+            font-family: var(--font-tamil);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            margin-bottom: 0.2rem;
+        }
+
+        .deity-name-english {
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            color: var(--gold-pale);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 1rem;
+        }
+
+        .deity-desc {
+            font-family: var(--font-tamil);
+            font-size: 0.88rem;
+            line-height: 1.8;
+            color: var(--gold-pale);
+            opacity: 0.85;
+        }
+
+        .deity-desc .en {
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-style: italic;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        /* ============================================
+           FESTIVALS SECTION
+           ============================================ */
+        .festivals {
+            background: var(--sacred-cream);
+            position: relative;
+        }
+
+        .festivals-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .festival-item {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid var(--temple-crimson);
+            box-shadow: 0 2px 20px rgba(74, 8, 8, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .festival-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(212, 160, 23, 0.06), transparent);
+        }
+
+        .festival-item:hover {
+            box-shadow: 0 4px 30px rgba(74, 8, 8, 0.12);
+            transform: translateX(4px);
+        }
+
+        .festival-month {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--temple-crimson), var(--temple-deep-red));
+            border-radius: 6px;
+            padding: 1rem;
+            min-height: 90px;
+        }
+
+        .festival-month-tamil {
+            font-family: var(--font-tamil);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--gold-light);
+        }
+
+        .festival-month-en {
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            color: var(--gold-pale);
+            opacity: 0.8;
+        }
+
+        .festival-details h3 {
+            font-family: var(--font-tamil);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--temple-crimson);
+            margin-bottom: 0.2rem;
+        }
+
+        .festival-details h4 {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            color: var(--wood-medium);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+
+        .festival-details p {
+            font-family: var(--font-tamil);
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--wood-dark);
+        }
+
+        .festival-details .en {
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            color: var(--wood-medium);
+            font-style: italic;
+            margin-top: 0.3rem;
+        }
+
+        /* ============================================
+           LOCATION / MAP SECTION
+           ============================================ */
+        .location {
+            background: linear-gradient(180deg, var(--sacred-ivory), var(--sacred-cream));
+        }
+
+        .location-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            align-items: start;
+        }
+
+        .map-container {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 3px solid var(--gold-deep);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .map-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(212, 160, 23, 0.3);
+            border-radius: 6px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 400px;
+            display: block;
+        }
+
+        .location-info {
+            padding: 1rem 0;
+        }
+
+        .location-info-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1.2rem 0;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.15);
+        }
+
+        .location-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .location-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--temple-crimson), var(--temple-deep-red));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+        }
+
+        .location-detail-label {
+            font-family: var(--font-tamil);
+            font-size: 0.75rem;
+            color: var(--wood-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.2rem;
+        }
+
+        .location-detail-value {
+            font-family: var(--font-tamil);
+            font-size: 0.95rem;
+            color: var(--wood-dark);
+            font-weight: 600;
+        }
+
+        .location-detail-value-en {
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--wood-medium);
+            font-style: italic;
+        }
+
+        /* ============================================
+           VISIT INFO / TIMINGS
+           ============================================ */
+        .visit {
+            background: linear-gradient(180deg, var(--temple-maroon), var(--temple-black));
+            color: var(--gold-pale);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visit::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(212, 160, 23, 0.015) 40px,
+                    rgba(212, 160, 23, 0.015) 41px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(212, 160, 23, 0.015) 40px,
+                    rgba(212, 160, 23, 0.015) 41px
+                );
+        }
+
+        .visit .section-title-tamil {
+            color: var(--gold-light);
+        }
+
+        .visit .section-title-english {
+            color: var(--gold-pale);
+            opacity: 0.7;
+        }
+
+        .visit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            position: relative;
+        }
+
+        .visit-card {
+            background: rgba(139, 26, 26, 0.3);
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .visit-card-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .visit-card-title {
+            font-family: var(--font-tamil);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            margin-bottom: 0.2rem;
+        }
+
+        .visit-card-title-en {
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            color: var(--gold-pale);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            opacity: 0.6;
+            margin-bottom: 1rem;
+        }
+
+        .visit-card-content {
+            font-family: var(--font-tamil);
+            font-size: 0.9rem;
+            line-height: 1.9;
+            color: var(--gold-pale);
+            opacity: 0.85;
+        }
+
+        .visit-card-content .time {
+            display: block;
+            font-weight: 600;
+            color: var(--gold-light);
+            font-size: 1rem;
+            margin: 0.3rem 0;
+        }
+
+        /* ============================================
+           GALLERY CAROUSEL
+           ============================================ */
+        .gallery {
+            background: linear-gradient(180deg, var(--sacred-cream), var(--sacred-ivory));
+            padding: var(--section-padding) 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gallery-track-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .gallery-track {
+            display: flex;
+            gap: 1.2rem;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0.5rem 0;
+        }
+
+        .gallery-slide {
+            min-width: 280px;
+            height: 370px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 3px solid var(--gold-deep);
+            box-shadow: 0 6px 25px rgba(74, 8, 8, 0.15);
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.4s ease;
+        }
+
+        .gallery-slide:hover {
+            border-color: var(--gold-bright);
+            transform: scale(1.03);
+            box-shadow: 0 10px 40px rgba(74, 8, 8, 0.25);
+        }
+
+        .gallery-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-slide:hover img {
+            transform: scale(1.05);
+        }
+
+        .gallery-slide-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.2rem 1rem 0.8rem;
+            background: linear-gradient(0deg, rgba(26, 10, 10, 0.85) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-slide:hover .gallery-slide-overlay {
+            opacity: 1;
+        }
+
+        .gallery-slide-overlay span {
+            font-family: var(--font-tamil);
+            font-size: 0.85rem;
+            color: var(--gold-light);
+        }
+
+        .gallery-slide-overlay .zoom-hint {
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            color: var(--gold-pale);
+            opacity: 0.7;
+            display: block;
+            margin-top: 0.2rem;
+        }
+
+        .gallery-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .gallery-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--gold-deep);
+            background: linear-gradient(135deg, var(--temple-crimson), var(--temple-deep-red));
+            color: var(--gold-light);
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .gallery-btn:hover {
+            background: linear-gradient(135deg, var(--temple-deep-red), var(--temple-maroon));
+            border-color: var(--gold-bright);
+            transform: scale(1.1);
+        }
+
+        /* Lightbox / Zoom Modal */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(10, 2, 2, 0.95);
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+            animation: lbFadeIn 0.3s ease;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        @keyframes lbFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .lightbox img {
+            max-width: 90vw;
+            max-height: 88vh;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 3px solid var(--gold-deep);
+            box-shadow: 0 0 80px rgba(212, 160, 23, 0.2);
+            animation: lbZoomIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes lbZoomIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 2rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid var(--gold-deep);
+            background: rgba(74, 8, 8, 0.8);
+            color: var(--gold-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .lightbox-close:hover {
+            background: var(--temple-crimson);
+            border-color: var(--gold-bright);
+        }
+
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--gold-deep);
+            background: rgba(74, 8, 8, 0.7);
+            color: var(--gold-light);
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .lightbox-nav:hover {
+            background: var(--temple-crimson);
+            border-color: var(--gold-bright);
+        }
+
+        .lightbox-nav.prev { left: 1.5rem; }
+        .lightbox-nav.next { right: 1.5rem; }
+
+        .lightbox-caption {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-tamil);
+            font-size: 1rem;
+            color: var(--gold-light);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-slide {
+                min-width: 240px;
+                height: 320px;
+            }
+
+            .lightbox-nav.prev { left: 0.5rem; }
+            .lightbox-nav.next { right: 0.5rem; }
+
+            .lightbox img {
+                max-width: 95vw;
+            }
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .footer {
+            background: var(--temple-black);
+            padding: 2.5rem 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--temple-crimson), var(--gold-bright), var(--saffron), var(--gold-bright), var(--temple-crimson));
+        }
+
+        .footer-om {
+            font-size: 1.5rem;
+            color: var(--gold-deep);
+            opacity: 0.6;
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-temple-name {
+            font-family: var(--font-tamil);
+            font-size: 1rem;
+            color: var(--gold-light);
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .footer-location {
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--gold-pale);
+            opacity: 0.5;
+            font-style: italic;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            font-family: var(--font-tamil);
+            font-size: 0.8rem;
+            color: var(--gold-deep);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--gold-bright);
+        }
+
+        .footer-divider {
+            width: 60px;
+            height: 1px;
+            background: rgba(212, 160, 23, 0.2);
+            margin: 0 auto 1rem;
+        }
+
+        .footer-copy {
+            font-family: var(--font-body);
+            font-size: 0.8rem;
+            color: rgba(212, 160, 23, 0.3);
+        }
+
+        /* ============================================
+           KOLAM CORNER DECORATIONS
+           ============================================ */
+        .kolam-corner {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            opacity: 0.08;
+        }
+
+        .kolam-corner::before,
+        .kolam-corner::after {
+            content: '';
+            position: absolute;
+            border: 2px solid var(--gold-bright);
+            border-radius: 50%;
+        }
+
+        .kolam-corner::before {
+            width: 40px;
+            height: 40px;
+            top: 10px;
+            left: 10px;
+        }
+
+        .kolam-corner::after {
+            width: 25px;
+            height: 25px;
+            top: 18px;
+            left: 18px;
+        }
+
+        .kolam-corner.top-left { top: 20px; left: 20px; }
+        .kolam-corner.top-right { top: 20px; right: 20px; transform: scaleX(-1); }
+        .kolam-corner.bottom-left { bottom: 20px; left: 20px; transform: scaleY(-1); }
+        .kolam-corner.bottom-right { bottom: 20px; right: 20px; transform: scale(-1); }
+
+        /* ============================================
+           SCROLL ANIMATIONS
+           ============================================ */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                flex-direction: column;
+                background: rgba(74, 8, 8, 0.98);
+                padding: 1rem;
+                gap: 0;
+            }
+
+            .nav-links.open {
+                display: flex;
+            }
+
+            .nav-links a {
+                padding: 0.8rem 1rem;
+                border-bottom: 1px solid rgba(212, 160, 23, 0.1);
+            }
+
+            .nav-mobile-toggle {
+                display: block;
+            }
+
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .location-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .map-container iframe {
+                height: 300px;
+            }
+
+            .festival-item {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .festival-month {
+                flex-direction: row;
+                gap: 0.5rem;
+                min-height: auto;
+                padding: 0.6rem 1rem;
+            }
+
+            .history-content {
+                grid-template-columns: 3px 1fr;
+                gap: 1.5rem;
+            }
+
+            .hero-god-image {
+                width: 140px;
+                height: 140px;
+            }
+
+            .hero-gopuram {
+                width: 200px;
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-inner {
+                padding: 0.6rem 1rem;
+            }
+
+            .section {
+                padding: 3rem 1.2rem;
+            }
+
+            .about-info-card {
+                padding: 1.5rem;
+            }
+
+            .visit-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .deity-card {
+                padding: 2rem 1.5rem;
+            }
+        }
