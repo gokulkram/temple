@@ -93,6 +93,31 @@ edit. Reverting to delete-by-absence brings the data loss straight back.
    previews show no image.
 6. Change the admin password. Force HTTPS.
 
+## Deploying to Railway
+
+The repo is set up to build straight from `Dockerfile` — no manual server
+config needed.
+
+1. Create a Railway project, add a **MySQL** database plugin, and add this
+   repo as a second service (`railway.json` points it at the `Dockerfile`
+   build).
+2. On the app service's **Variables** tab, add references to the MySQL
+   plugin's `MYSQLHOST`, `MYSQLPORT`, `MYSQLDATABASE`, `MYSQLUSER`,
+   `MYSQLPASSWORD`. `includes/config.php` reads these directly — once they're
+   set there's nothing to edit in code.
+3. Import the schema: connect to the MySQL plugin's public connection string
+   (Railway shows it on the plugin's **Connect** tab) with any MySQL client
+   and run `sql/schema.sql` then `sql/seed.sql`.
+4. Deploy. The `Dockerfile` already sets `AllowOverride All` so `.htaccess`
+   in `includes/` and `images/` is honoured out of the box, and
+   `entrypoint.sh` rebinds Apache to Railway's dynamic `$PORT` at container
+   start — no extra config needed for either.
+5. If you mount a volume at `images/` (so uploads survive redeploys), leave
+   it empty on first attach — `entrypoint.sh` detects the empty volume and
+   seeds it from the image's baked-in photos automatically.
+6. In admin → Site Settings, replace both `REPLACE-WITH-DOMAIN` values with
+   the Railway-assigned (or custom) domain. Change the admin password.
+
 ## Backups
 
 The database holds all text; `images/` holds all photos. **Back up both** — a
