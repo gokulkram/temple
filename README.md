@@ -13,6 +13,8 @@ images/              photos + thumbs/  ·  .htaccess blocks execution here
 includes/            config, db, auth, sanitize, upload, collections
   .htaccess          denies all direct HTTP access to this folder
 admin/               login, dashboard, editors, gallery, password
+api/                 bearer-token JSON API for the mobile app - see mobile/README.md
+mobile/              Expo/React Native admin app (builds to an APK) - see mobile/README.md
 sql/                 old MariaDB schema.sql + seed.sql - kept for reference,
                      not used since the move to MongoDB
 scripts/             migrate-to-mongo.php - one-off MySQL->Mongo migration,
@@ -53,6 +55,13 @@ Username `admin`. **Change the password on first login** (Password page).
 One generic editor (`admin/edit.php`) drives all seven sections from
 `includes/collections.php`. **Adding a field means adding one line there**, not
 writing a new page.
+
+## Mobile admin app
+
+`mobile/` is an Expo/React Native app (builds to an APK) that drives the same
+admin functionality from a phone, talking to the bearer-token JSON API in
+`api/` rather than the web admin's session cookies. See `mobile/README.md`
+for running it locally and building the APK.
 
 ## Security design
 

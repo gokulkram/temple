@@ -34,6 +34,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
         // A password change should invalidate any other stolen session.
         session_regenerate_id(true);
+        // ...and any stolen mobile-app bearer token (api/password.php does the
+        // same when the change comes from that side).
+        db()->selectCollection('api_tokens')->updateMany(
+            ['user_id' => $userId],
+            ['$set' => ['revoked' => true]]
+        );
         flash('கடவுச்சொல் மாற்றப்பட்டது. (Password changed.)');
         redirect('index.php');
     }

@@ -41,7 +41,7 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # dump/archive at the repo root. scripts/ is the MySQL->Mongo migration
 # tool, meant to be run manually from a developer machine, not shipped in
 # the image. Keeping them out of the image is just size.
-RUN rm -rf _eleventy _original aa.zip aa.sql sample.pdf scripts sql
+RUN rm -rf _eleventy _original aa.zip aa.sql sample.pdf scripts sql mobile
 
 # A Render disk mounted at images/ starts EMPTY, which would hide the
 # photos baked into this image. Keep a pristine copy so the entrypoint can
