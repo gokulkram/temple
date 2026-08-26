@@ -23,10 +23,11 @@
       }
     },
     "production": {
+      "credentialsSource": "local",
       "android": { "buildType": "apk" },
       "env": {
         "APP_VARIANT": "production",
-        "EXPO_PUBLIC_API_BASE_URL": "https://REPLACE-WITH-YOUR-RENDER-DOMAIN.onrender.com/api"
+        "EXPO_PUBLIC_API_BASE_URL": "https://temple-x0fq.onrender.com/api"
       }
     }
   }
