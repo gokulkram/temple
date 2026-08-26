@@ -20,7 +20,6 @@ sql/                 old MariaDB schema.sql + seed.sql - kept for reference,
 scripts/             migrate-to-mongo.php - one-off MySQL->Mongo migration,
                      not part of the deployed app
 _original/           the hand-written HTML this was built from
-_eleventy/           earlier Git-CMS attempt, unused - safe to delete
 ```
 
 ## Running locally
