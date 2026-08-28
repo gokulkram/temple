@@ -80,6 +80,16 @@ export interface FestivalItem extends RowBase {
   body_en: string;
 }
 
+export interface SpecialDayItem extends RowBase {
+  month_ta: string;
+  month_en: string;
+  date_label: string;
+  title_ta: string;
+  title_en: string;
+  body_ta: string;
+  body_en: string;
+}
+
 export interface LocationItem extends RowBase {
   icon: string;
   label: string;
@@ -113,6 +123,7 @@ export interface PublicContent {
   history_entries: HistoryEntry[];
   deity_cards: DeityCard[];
   festival_items: FestivalItem[];
+  special_day_items: SpecialDayItem[];
   location_items: LocationItem[];
   visit_cards: VisitCard[];
   gallery_photos: GalleryPhoto[];

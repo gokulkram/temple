@@ -42,6 +42,7 @@ try {
         'history_entries' => all('history_entries'),
         'deity_cards' => all('deity_cards'),
         'festival_items' => all('festival_items'),
+        'special_day_items' => all('special_day_items'),
         'location_items' => all('location_items'),
         'visit_cards' => all('visit_cards'),
         'gallery_photos' => $photos,

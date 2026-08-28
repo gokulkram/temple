@@ -17,6 +17,7 @@ import RichText from '../src/components/RichText';
 import SectionHeader from '../src/components/SectionHeader';
 import DeityCard from '../src/components/DeityCard';
 import FestivalItem from '../src/components/FestivalItem';
+import SpecialDayCard from '../src/components/SpecialDayCard';
 import VisitCard from '../src/components/VisitCard';
 import LocationItem from '../src/components/LocationItem';
 import GalleryGrid from '../src/components/GalleryGrid';
@@ -141,6 +142,14 @@ export default function Home() {
         <SectionHeader heading={sections.festivals} />
         {data.festival_items.map((f) => (
           <FestivalItem key={f.id} item={f} />
+        ))}
+      </View>
+
+      {/* Special Day of the Month */}
+      <View style={styles.section}>
+        <SectionHeader heading={sections.special_days} />
+        {data.special_day_items.map((s) => (
+          <SpecialDayCard key={s.id} item={s} />
         ))}
       </View>
 
