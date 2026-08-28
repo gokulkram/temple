@@ -19,6 +19,7 @@ $aboutRows     = all('about_rows');
 $history       = all('history_entries');
 $deities       = all('deity_cards');
 $festivals     = all('festival_items');
+$specialDays   = all('special_day_items');
 $locationItems = all('location_items');
 $visitCards    = all('visit_cards');
 $photos        = all('gallery_photos');
@@ -228,6 +229,38 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
                         <h4><?= esc($f['title_en']) ?></h4>
                         <p><?= clean_html($f['body_ta']) ?></p>
                         <p class="en"><?= clean_html($f['body_en']) ?></p>
+                    </div>
+                </div>
+<?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- SPECIAL DAY OF THE MONTH -->
+    <section class="section special-days" id="special-days">
+        <div class="section-inner">
+            <div class="section-header reveal">
+                <div class="section-title-tamil"><?= esc($sec['special_days']['title_ta']) ?></div>
+                <div class="section-title-english"><?= esc($sec['special_days']['title_en']) ?></div>
+            <div class="section-ornament">
+                <div class="line"></div>
+                <div class="dot"></div>
+                <div class="line"></div>
+            </div>
+            </div>
+            <div class="special-days-list">
+<?php foreach ($specialDays as $d): ?>
+                <div class="special-day-item reveal">
+                    <div class="special-day-month">
+                        <div class="special-day-month-tamil"><?= esc($d['month_ta']) ?></div>
+                        <div class="special-day-month-en"><?= esc($d['month_en']) ?></div>
+                        <div class="special-day-date"><?= esc($d['date_label']) ?></div>
+                    </div>
+                    <div class="special-day-details">
+                        <h3><?= esc($d['title_ta']) ?></h3>
+                        <h4><?= esc($d['title_en']) ?></h4>
+                        <p><?= clean_html($d['body_ta']) ?></p>
+                        <p class="en"><?= clean_html($d['body_en']) ?></p>
                     </div>
                 </div>
 <?php endforeach; ?>

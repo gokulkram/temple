@@ -118,6 +118,28 @@ function collections(): array
             ],
         ],
 
+        'special_days' => [
+            'label'   => 'மாத விசேஷ நாள் / Special Day of the Month',
+            'icon'    => '📅',
+            'section' => 'special_days',
+            'lists'   => [
+                'special_day_items' => [
+                    'label'   => 'மாதங்கள் / Months',
+                    'summary' => 'month_ta',
+                    'fields'  => [
+                        ['name' => 'month_ta',   'label' => 'மாதம் (தமிழ்)', 'type' => 'text', 'required' => true],
+                        ['name' => 'month_en',   'label' => 'Month (English)', 'type' => 'text', 'required' => true],
+                        ['name' => 'date_label', 'label' => 'தேதி / நாள் / Date or day', 'type' => 'text', 'required' => true,
+                         'hint' => 'e.g. 14th, or Pournami'],
+                        ['name' => 'title_ta',   'label' => 'நிகழ்வு (தமிழ்)', 'type' => 'text', 'required' => true],
+                        ['name' => 'title_en',   'label' => 'Occasion (English)', 'type' => 'text', 'required' => true],
+                        ['name' => 'body_ta',    'label' => 'விவரம் (தமிழ்)', 'type' => 'rich'],
+                        ['name' => 'body_en',    'label' => 'Description (English)', 'type' => 'rich'],
+                    ],
+                ],
+            ],
+        ],
+
         'location' => [
             'label'   => 'இடம் / Location',
             'icon'    => '📍',

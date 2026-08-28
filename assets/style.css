@@ -914,6 +914,103 @@
         }
 
         /* ============================================
+           SPECIAL DAY OF THE MONTH SECTION
+           ============================================ */
+        .special-days {
+            background: var(--sacred-ivory);
+            position: relative;
+        }
+
+        .special-days-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .special-day-item {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid var(--gold-light);
+            box-shadow: 0 2px 20px rgba(74, 8, 8, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .special-day-item:hover {
+            box-shadow: 0 4px 30px rgba(74, 8, 8, 0.12);
+            transform: translateX(4px);
+        }
+
+        .special-day-month {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--temple-crimson), var(--temple-deep-red));
+            border-radius: 6px;
+            padding: 1rem;
+            min-height: 90px;
+        }
+
+        .special-day-month-tamil {
+            font-family: var(--font-tamil);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--gold-light);
+        }
+
+        .special-day-month-en {
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            color: var(--gold-pale);
+            opacity: 0.8;
+        }
+
+        .special-day-date {
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            color: var(--gold-pale);
+            margin-top: 0.3rem;
+        }
+
+        .special-day-details h3 {
+            font-family: var(--font-tamil);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--temple-crimson);
+            margin-bottom: 0.2rem;
+        }
+
+        .special-day-details h4 {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            color: var(--wood-medium);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+
+        .special-day-details p {
+            font-family: var(--font-tamil);
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--wood-dark);
+        }
+
+        .special-day-details .en {
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            color: var(--wood-medium);
+            font-style: italic;
+            margin-top: 0.3rem;
+        }
+
+        /* ============================================
            LOCATION / MAP SECTION
            ============================================ */
         .location {
@@ -1502,6 +1599,19 @@
 
             .festival-month {
                 flex-direction: row;
+                gap: 0.5rem;
+                min-height: auto;
+                padding: 0.6rem 1rem;
+            }
+
+            .special-day-item {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .special-day-month {
+                flex-direction: row;
+                flex-wrap: wrap;
                 gap: 0.5rem;
                 min-height: auto;
                 padding: 0.6rem 1rem;
