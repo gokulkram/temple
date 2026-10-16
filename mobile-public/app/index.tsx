@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { getPublicContent, ApiError } from '../src/api/client';
@@ -25,8 +26,15 @@ import type { PublicContent } from '../src/types';
 
 const GALLERY_TEASER_COUNT = 6;
 
+// The hero title's longest line ("கருப்பராயர் திருக்கோவில்") is ~15.6x its font
+// size wide; size the font so each <br>-separated half stays on one line.
+const HERO_TITLE_WIDTH_RATIO = 16.5;
+const HERO_TITLE_MAX_SIZE = 26;
+
 export default function Home() {
   const navigation = useNavigation();
+  const { width } = useWindowDimensions();
+  const heroTitleSize = Math.min(HERO_TITLE_MAX_SIZE, Math.floor((width - 40) / HERO_TITLE_WIDTH_RATIO));
   const [data, setData] = useState<PublicContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,13 +94,12 @@ export default function Home() {
           />
         ) : null}
         <View style={styles.heroOverlay}>
-          {settings.brand_ta ? <RichText html={settings.brand_ta} style={styles.brand} /> : null}
           {settings.hero_title_ta ? (
-            <RichText html={settings.hero_title_ta} style={styles.heroTitleTa} />
+            <RichText
+              html={settings.hero_title_ta}
+              style={[styles.heroTitleTa, { fontSize: heroTitleSize, lineHeight: Math.round(heroTitleSize * 1.5) }]}
+            />
           ) : null}
-          <Text style={styles.heroTitleEn}>{settings.hero_title_en}</Text>
-          <Text style={styles.heroSubtitleTa}>{settings.hero_subtitle_ta}</Text>
-          <Text style={styles.heroSubtitleEn}>{settings.hero_subtitle_en}</Text>
         </View>
       </View>
 
@@ -221,11 +228,7 @@ const styles = StyleSheet.create({
     minHeight: 260,
     justifyContent: 'flex-end',
   },
-  brand: { color: '#fff', fontSize: 14, marginBottom: 4 },
-  heroTitleTa: { color: '#fff', fontSize: 26, fontWeight: '700' },
-  heroTitleEn: { color: '#eee', fontSize: 16, marginTop: 2 },
-  heroSubtitleTa: { color: '#fff', fontSize: 14, marginTop: 10 },
-  heroSubtitleEn: { color: '#ddd', fontSize: 13, marginTop: 2 },
+  heroTitleTa: { color: '#fff', fontWeight: '700' },
   section: { padding: 20, borderBottomWidth: 1, borderBottomColor: '#eee' },
   aboutRow: { marginBottom: 10 },
   aboutLabel: { fontSize: 13, color: '#777', marginBottom: 2 },
