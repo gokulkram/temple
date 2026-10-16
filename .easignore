@@ -1,0 +1,67 @@
+# EAS Build archive for mobile/ and mobile-public/ - see https://expo.fyi/eas-build-archive
+# EAS archives the whole git repository and only reads .easignore from the
+# repo root, so this file serves both apps. When it exists .gitignore is NOT
+# applied, so everything normally gitignored needs repeating here explicitly.
+
+# The PHP site - not part of either app build.
+/_original/
+/admin/
+/api/
+/assets/
+/images/
+/includes/
+/scripts/
+/sql/
+/vendor/
+/.dockerignore
+/Dockerfile
+/README.md
+/composer.json
+/composer.lock
+/entrypoint.sh
+/index.php
+/render.yaml
+/aa.sql
+/aa.zip
+/*.png
+
+# Local tooling output.
+.claude/
+.playwright-mcp/
+
+node_modules/
+android/
+ios/
+
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+.git/
+.kotlin/
+*.orig.*
+
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+.DS_Store
+*.pem
+
+.env
+.env*.local
+
+# never ship signing secrets in the build archive - credentialsSource:local
+# reads these from disk locally and uploads them to EAS separately.
+credentials.json
+*.keystore
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+*.tsbuildinfo
+
+.metro-health-check*
