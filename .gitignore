@@ -7,3 +7,6 @@ _site/
 # project layout (see README), and aa.sql carries an old credential hash.
 /aa.sql
 /aa.zip
+
+# Playwright MCP browser-tool output (screenshots, logs, page snapshots).
+/.playwright-mcp/
